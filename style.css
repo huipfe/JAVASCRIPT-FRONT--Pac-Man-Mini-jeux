@@ -1,0 +1,41 @@
+#game {
+    /* widthCase * 28 */
+    width: 560px;
+    /* HeightCase * 28 */
+    height: 560px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#game div {
+    width: 20px;
+    height: 20px;
+}
+
+/* Mur Case 1 */
+#game div.mur {
+    background-color: rgb(8, 8, 190);
+}
+
+/* Chemin avec point Case 0 */
+#game div.point { 
+    background-color: salmon;
+    border-radius: 50%;
+    border: black solid 7px;
+    /* box-sizing: border-box; Inutile avec bootstrap */
+}
+
+/* fantome-area Case 2 */
+#game div.fantome-area {
+    background-color: gray;
+}
+
+/* point-puissance Case 3 */
+#game div.point-puissance {
+    background-color: greenyellow;
+    border-radius: 50%;
+    border: black solid 3px;
+}
+
+
+/* Vide/empty Case 4 */
