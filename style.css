@@ -1,4 +1,13 @@
+/* body,
+html {
+    background-color: black; */
+    /* margin: auto;
+} */
+
+
 #game {
+    /* background-color: black; */
+
     /* widthCase * 28 */
     width: 560px;
     /* HeightCase * 28 */
@@ -14,7 +23,7 @@
 
 /* Mur Case 1 */
 #game div.mur {
-    background-color: rgb(8, 8, 190);
+    background-color: rgb(20, 20, 187);
 }
 
 /* Chemin avec point Case 0 */
@@ -37,5 +46,12 @@
     border: black solid 3px;
 }
 
-
 /* Vide/empty Case 4 */
+
+/* Pac-Man */
+#game div.pacman {
+    background-color: yellow;
+    border-radius: 50%;
+    border: black solid 1px;
+}
+
