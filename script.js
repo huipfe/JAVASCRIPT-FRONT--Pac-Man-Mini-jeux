@@ -10,6 +10,8 @@
 
 const gameDiv = document.getElementById("game")
 const sizeCaseWitdth = 28
+const scoreHTML = document.getElementById("score")
+let score = 0;
 const layout = [
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
@@ -55,8 +57,10 @@ document.addEventListener("keydown", (event) => {
         deplacerPacMan(event.key); 
 }); 
 
+// 
 function createLayout() {
     let cptCase = 0
+    scoreHTML.innerHTML = score;
     layout.forEach(caseLayout => {
     let casePlateau = document.createElement("div"); 
     casePlateau.dataset.numerocase = cptCase;
@@ -89,11 +93,13 @@ function createLayout() {
     getCaseByIndex(489).classList.add("pacman");
 }
 
+// 
 function getCaseByIndex(index){
     let caseGame = document.querySelector("[data-numeroCase='" + index + "']");
     return caseGame;
 }
 
+// 
 function deplacerPacMan(direction) {
     let pacmanDiv = document.querySelector(".pacman")
     let pacManCase = pacmanDiv.dataset.numerocase;
@@ -136,6 +142,22 @@ function checkDirection (caseDestination)
         return false;
     }
     else {
+        if (caseDestination.classList.contains("point")){
+            incrementeScore()
+            caseDestination.classList.remove("point")
+        }
         return true; 
+    }
+}
+
+function incrementeScore () {
+score++
+scoreHTML.innerHTML = score;
+
+// let allPoints = layout.filter(1=> 1==0);
+console.table(allPoints)
+
+if(score == allPoints.length){
+    alert("You Win, motherfucker !");
     }
 }
