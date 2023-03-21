@@ -3,9 +3,13 @@
  * OK 2) Créer son PACMAN 
  * OK 3) Gérer les déplacement. (sans contrainte) 
  * OK 4) Gérer les contraintes de déplacement (pas dans les murs) 
- * 5) Pièce à manger
- * 6) Gérer les fantomes
- * 7) Sprite ? Mettre un vrai pacman à la place du point jaune
+ * OK 5) Pièce à manger
+ * OK 6) Gérer les fantomes
+ * 7) Déplacer les fantomes mieux
+ * 8) Gerer la collision entre pac-man et un fantome
+ * 9) Gerer les pastilles vertes de puissance (un mode ou pacman peut manger un fantome)
+ * 10) Gerer une cerise.
+ * ??) Sprite ? Mettre un vrai pacman à la place du point jaune
  */
 
 const gameDiv = document.getElementById("game")
@@ -91,9 +95,14 @@ function createLayout() {
     });
     // let caseDepart = document.querySelector("[data-numeroCase='"+489+"']");
     getCaseByIndex(489).classList.add("pacman");
+
+    generatePhantom()
+
+    // Déplacement des fantomes aléatoire
+    setInterval(DeplacePhantom, 1000)
 }
 
-// 
+//  
 function getCaseByIndex(index){
     let caseGame = document.querySelector("[data-numeroCase='" + index + "']");
     return caseGame;
@@ -107,57 +116,162 @@ function deplacerPacMan(direction) {
     switch (direction) {
         case "ArrowUp":
             // Déplacer la case contenant pac-man, de 1 vers le haut
-            caseDestination = getCaseByIndex(parseInt(pacManCase) - sizeCaseWitdth)
+            caseDestination = getNumberCaseDestination(pacManCase, directions.Up);
             break;
         case "ArrowRight":
             // Déplacer la case contenant pac-man, de 1 vers la droite
-            caseDestination = getCaseByIndex(parseInt(pacManCase) + 1)
+            caseDestination = getNumberCaseDestination(pacManCase, directions.Right);
 
             break;
         case "ArrowLeft":
             // Déplacer la case contenant pac-man, de 1 vers la gauche
-            caseDestination = getCaseByIndex(parseInt(pacManCase) - 1 )
+            caseDestination = getNumberCaseDestination(pacManCase, directions.Left);
 
             break;
         case "ArrowDown":
             // Déplacer la case contenant pac-man, de 1 vers le bas
-            caseDestination = getCaseByIndex(parseInt(pacManCase) + sizeCaseWitdth)          
+            caseDestination = getNumberCaseDestination(pacManCase, directions.Down);        
             break;
         default:
             break;
     };
     if (caseDestination != null) {
-        if (checkDirection(caseDestination)) {
+        if (checkDirectionWall(caseDestination)) {
             pacmanDiv.classList.remove("pacman");
             caseDestination.classList.add("pacman")
+            checkPointEating(caseDestination)
         }
     }
 }
 
 // Return faux si je peux pas aller la ou je veux
 // return vrai si je peux
-function checkDirection (caseDestination)
+function checkDirectionWall (caseDestination)
 {
     if (caseDestination.classList.contains("mur")) {
         return false;
     }
     else {
-        if (caseDestination.classList.contains("point")){
-            incrementeScore()
-            caseDestination.classList.remove("point")
-        }
+
         return true; 
     }
 }
 
-function incrementeScore () {
+// Retourne Vrai, si on est en collision avec un fantome
+function checkPhantomCollision(caseDestination) {
+    if (caseDestination.classList.contains("fantome")) {
+        return true;
+    }
+    else {
+
+        return false;
+    }
+}
+
+function checkPointEating(caseDestination){
+    if (caseDestination.classList.contains("point")) {
+        incrementScore()
+        caseDestination.classList.remove("point")
+    }
+}
+
+function incrementScore () {
 score++
 scoreHTML.innerHTML = score;
-
 // let allPoints = layout.filter(1=> 1==0);
-console.table(allPoints)
-
+// console.log(allPoints.length);
 if(score == allPoints.length){
     alert("You Win, motherfucker !");
     }
 }
+
+function generatePhantom (){
+    for(let i = 0; i < 4; i++) {
+        // Je récupere les cases possible, qui peuvent supporter la génération d'un fantome
+        // Elles ont la classe fantome-area, et n'ont pas la classe fantome
+        let casePotentialForPhantom = document.querySelectorAll(".fantome-area:not(.fantome)")
+
+        // Générer un fantome * 4 
+        // Parmis les cases dispo, j'en prends une au hasard
+        let caseForPhantom = casePotentialForPhantom[getRandomNumber(casePotentialForPhantom.length)];
+
+        // J'ajoute la classe fantome à mon fantome
+        caseForPhantom.classList.add("fantome");
+
+    }
+
+}
+
+function getRandomNumber(max){
+    return Math.floor(Math.random() * max);
+}
+
+function DeplacePhantom(){
+    // console.log("Déplacer Fantome")
+    // Récuperer tous mes fantomes
+    let allPhantom = document.querySelectorAll(".fantome");
+    allPhantom.forEach(fantome => {
+        let goodDirectionFinded = false
+        while (!goodDirectionFinded){
+            let direction = getRandomNumber(4);
+            let fantomeCaseId = fantome.dataset.numerocase;
+            switch (direction) {
+                case 0: //Vers le haut
+                    caseDestination = getNumberCaseDestination(fantomeCaseId, directions.Up);
+                    break;
+
+                case 1: //Vers le bas
+                    caseDestination = getNumberCaseDestination(fantomeCaseId, directions.Down);
+                    break;
+
+                case 2: //Vers la gauche
+                    caseDestination = getNumberCaseDestination(fantomeCaseId, directions.Left);
+                    break;
+
+                case 3: //Vers la droite
+                    caseDestination = getNumberCaseDestination(fantomeCaseId, directions.Right);
+                    break;
+            }
+            // Vérifier si je peux aller dans cette direction
+            if (checkDirectionWall(caseDestination) && !checkPhantomCollision(caseDestination)) {
+                fantome.classList.remove("fantome");
+                caseDestination.classList.add("fantome")
+                goodDirectionFinded = true;
+            }
+        }
+    });
+}
+
+function getNumberCaseDestination(caseActuelle, direction){
+    let caseDestination = null;
+    switch (direction) {
+        case directions.Up:
+            // Déplacer la case contenant pac-man, de 1 vers le haut
+            caseDestination = getCaseByIndex(parseInt(caseActuelle) - sizeCaseWitdth)
+            break;
+        case directions.Right:
+            // Déplacer la case contenant pac-man, de 1 vers la droite
+            caseDestination = getCaseByIndex(parseInt(caseActuelle) + 1)
+
+            break;
+        case directions.Left:
+            // Déplacer la case contenant pac-man, de 1 vers la gauche
+            caseDestination = getCaseByIndex(parseInt(caseActuelle) - 1)
+
+            break;
+        case directions.Down:
+            // Déplacer la case contenant pac-man, de 1 vers le bas
+            caseDestination = getCaseByIndex(parseInt(caseActuelle) + sizeCaseWitdth)
+            break;
+        default:
+            break;
+    };
+    return caseDestination;
+}
+
+const directions = {
+    Up : 1,
+    Down : 2,
+    Right : 3,
+    Left : 4
+};
