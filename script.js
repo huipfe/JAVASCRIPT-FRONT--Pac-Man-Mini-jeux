@@ -1,25 +1,23 @@
-/** Faire un PACMAN
- * OK 1) Créer un plateau, dynamiquement. 
- * OK 2) Créer son PACMAN 
- * OK 3) Gérer les déplacement. (sans contrainte) 
- * OK 4) Gérer les contraintes de déplacement (pas dans les murs) 
- * OK 5) Pièce à manger
- * OK 6) Gérer les fantomes
- * 7) Déplacer les fantomes : en aléatoire 
- *     - Changement de direction si on rencontre un mur
- *     - Empecher retour au milieu, 
- *     - Ou 
- *     - Direction au hasard, hors mis direction précédente.
- * 8) Gerer la collision entre pac-man et un fantome
- * 9) Gerer les pastilles vertes de puissance (un mode ou pacman peut manger un fantome)
- * 10) Gerer une cerise.
- * ??) Sprite ? Mettre un vrai pacman à la place du point jaune
- */
-
-const gameDiv = document.getElementById("game")
-const sizeCaseWitdth = 28
-const scoreHTML = document.getElementById("score")
+const gameDiv = document.getElementById("game");
+const sizeCaseWidth = 28;
+const scoreHtml = document.getElementById("score");
 let score = 0;
+/*
+OK Créer le plateau (dynamique)
+OK Créer notre pacman
+OK Gérer ses déplacements (sans contrainte)
+OK Contraintes de déplacement (pas dans les murs)
+OK Pièces à manger
+OK  Générer les fantômes
+Déplacer les fantômes : Moyen, en aléatoire, déplacement pas top
+     - Changment de direction si on rencontre un mur
+     - Empecher retour ou milieu
+     - OU 
+     - Direction au hasard hors mis direction précédente
+Gérer collision pacman et un fantome
+Gérer les power-pellet (un mode ou pacman peut manger un fantome)
+*/
+
 const layout = [
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
@@ -50,119 +48,103 @@ const layout = [
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 ];
+// 0 - pac-dots
+// 1 - wall
+// 2 - ghost-lair
+// 3 - power-pellet
+// 4 - empty
 
-/**Signification Number of Array 
- * 0 - Pac-dots
- * 1 - wall
- * 2 - ghost-lair
- * 3 - power-pellet
- * 4 - empty
-*/
+creerPlateau();
 
-createLayout();
+document.addEventListener("keyup", (event) => {
+    DeplacerPacman(event.key);
+});
 
-document.addEventListener("keydown", (event) => {
-        deplacerPacMan(event.key); 
-}); 
-
-// 
-function createLayout() {
-    let cptCase = 0
-    scoreHTML.innerHTML = score;
+function creerPlateau() {
+    let cptCase = 0;
+    scoreHtml.innerHTML = score;
     layout.forEach(caseLayout => {
-    let casePlateau = document.createElement("div"); 
-    casePlateau.dataset.numerocase = cptCase;
-    // .innerHTML = caseLayout;
-    // Si case layout vaut 1, alors
-    switch(caseLayout){
-        case 0 :
-            casePlateau.classList.add("point");
-            break;
-        case 1 : 
-            casePlateau.classList.add("mur");
-            // ça me dessine les mur du plateau
-            break;
-        case 2 :
-            casePlateau.classList.add("fantome-area");
-            break;
-        case 3 :
-            casePlateau.classList.add("point-puissance");
-            break;
-        case 4 :
-            
-            break;
+        let casePlateau = document.createElement("div");
+        casePlateau.dataset.numerocase = cptCase;
+        switch (caseLayout) {
+            case 0:
+                casePlateau.classList.add("point");
+                break;
+            case 1:
+                casePlateau.classList.add("mur");
+                break;
+            case 2:
+                casePlateau.classList.add("fantome-area");
+                break;
+            case 3:
+                casePlateau.classList.add("point-puissance");
+                break;
+            case 4:
 
+                break;
         }
-    gameDiv.appendChild(casePlateau);
-    cptCase++;
-
+        gameDiv.appendChild(casePlateau);
+        cptCase++;
     });
-    // let caseDepart = document.querySelector("[data-numeroCase='"+489+"']");
+
     getCaseByIndex(489).classList.add("pacman");
+    generateFantome();
 
-    generatePhantom()
+    //Déplacement fantome aleatoire
+    setInterval(deplacerFantomes, 1000)
 
-    // Déplacement des fantomes aléatoire
-    setInterval(DeplacePhantom, 1000)
 }
 
-//  
-function getCaseByIndex(index){
-    let caseGame = document.querySelector("[data-numeroCase='" + index + "']");
+function getCaseByIndex(index) {
+    let caseGame = document.querySelector("[data-numerocase='" + index + "']");
     return caseGame;
 }
 
-// 
-function deplacerPacMan(direction) {
-    let pacmanDiv = document.querySelector(".pacman")
+function DeplacerPacman(direction) {
+    let pacmanDiv = document.querySelector(".pacman");
     let pacManCase = pacmanDiv.dataset.numerocase;
-    let caseDestination = null
+    let caseDestination = null;
     switch (direction) {
         case "ArrowUp":
-            // Déplacer la case contenant pac-man, de 1 vers le haut
-            caseDestination = getNumberCaseDestination(pacManCase, directions.Up);
+            //Déplacer la case contenant pacman de 1 vers le haut
+            caseDestination = getNumeroCaseDestination(pacManCase, directions.Haut);
             break;
         case "ArrowRight":
-            // Déplacer la case contenant pac-man, de 1 vers la droite
-            caseDestination = getNumberCaseDestination(pacManCase, directions.Right);
-
+            //Déplacer la case contenant pacman de 1 vers la droite
+            caseDestination = getNumeroCaseDestination(pacManCase, directions.Droite);
             break;
         case "ArrowLeft":
-            // Déplacer la case contenant pac-man, de 1 vers la gauche
-            caseDestination = getNumberCaseDestination(pacManCase, directions.Left);
-
+            //Déplacer la case contenant pacman de 1 vers la gauche
+            caseDestination = getNumeroCaseDestination(pacManCase, directions.Gauche);
             break;
         case "ArrowDown":
-            // Déplacer la case contenant pac-man, de 1 vers le bas
-            caseDestination = getNumberCaseDestination(pacManCase, directions.Down);        
-            break;
+            caseDestination = getNumeroCaseDestination(pacManCase, directions.Bas);
         default:
             break;
     };
     if (caseDestination != null) {
-        if (checkDirectionWall(caseDestination)) {
+        if (checkDirectionMur(caseDestination)) {
             pacmanDiv.classList.remove("pacman");
-            caseDestination.classList.add("pacman")
+            caseDestination.classList.add("pacman");
             checkPointEating(caseDestination)
         }
     }
 }
 
-// Return faux si je peux pas aller la ou je veux
-// return vrai si je peux
-function checkDirectionWall (caseDestination)
-{
+//return faux si je peux pas aller la où je veux
+//return vrai si je peux
+function checkDirectionMur(caseDestination) {
     if (caseDestination.classList.contains("mur")) {
         return false;
     }
     else {
 
-        return true; 
+        return true;
     }
 }
 
-// Retourne Vrai, si on est en collision avec un fantome
-function checkPhantomCollision(caseDestination) {
+//return true si on est en collision avec un fantome
+function CheckFantomeCollision(caseDestination) {
     if (caseDestination.classList.contains("fantome")) {
         return true;
     }
@@ -172,167 +154,150 @@ function checkPhantomCollision(caseDestination) {
     }
 }
 
-// 
-function checkPointEating(caseDestination){
+function checkPointEating(caseDestination) {
     if (caseDestination.classList.contains("point")) {
-        incrementScore()
-        caseDestination.classList.remove("point")
+        incrementScore();
+        caseDestination.classList.remove("point");
     }
 }
 
-// 
-function incrementScore () {
-score++
-scoreHTML.innerHTML = score;
-    // let allPoints = layout.filter(1 => 1 == 0);
-    let allPoints = layout.filter(l => l == 0);
-
-// console.log(allPoints.length);
-if(score == allPoints.length){
-    alert("You Win, motherfucker !");
+function incrementScore() {
+    score++;
+    scoreHtml.innerHTML = score;
+    let allpoints = layout.filter(l => l == 0);
+    if (score == allpoints.length) {
+        alert("C'est gagné");
     }
 }
 
-// 
-function generatePhantom (){
-    for(let i = 0; i < 4; i++) {
-        // Je récupere les cases possible, qui peuvent supporter la génération d'un fantome
-        // Elles ont la classe fantome-area, et n'ont pas la classe fantome
-        let casePotentialForPhantom = document.querySelectorAll(".fantome-area:not(.fantome)")
+function generateFantome() {
+    for (let i = 0; i < 4; i++) {
+        //Je récupère les cases qui peuvent supporter la génération d'un fantôme
+        //elles ont la classe fantome-area, et n'ont pas la classe fantome
+        let casePotentialForFantome = document.querySelectorAll(".fantome-area:not(.fantome)");
 
-        // Générer un fantome * 4 
-        // Parmis les cases dispo, j'en prends une au hasard
-        let caseForPhantom = casePotentialForPhantom[getRandomNumber(casePotentialForPhantom.length)];
+        //Parmis les cases dispo, j'en prends une au hasard
+        let caseForFantome = casePotentialForFantome[getRandomNumber(casePotentialForFantome.length)];
 
-        // J'ajoute la classe fantome à mon fantome
-        caseForPhantom.classList.add("fantome");
-
+        //J'ajoute la classe fantome à mon fantome
+        caseForFantome.classList.add("fantome");
     }
-
 }
 
-// 
-function getRandomNumber(max){
+function getRandomNumber(max) {
     return Math.floor(Math.random() * max);
 }
 
-// 
-function DeplacePhantom(){
-    // console.log("Déplacer Fantome")
-    // Récuperer tous mes fantomes
-    let allPhantom = document.querySelectorAll(".fantome");
-    allPhantom.forEach(fantome => {
-        let goodDirectionFinded = false
+function deplacerFantomes() {
+    //Récupérer tous mes fantômes
+    let allFantomes = document.querySelectorAll(".fantome");
+    allFantomes.forEach(fantome => {
+        let goodDirectionFinded = false;
+        let fantomeCaseId = fantome.dataset.numerocase;
 
-        while(!goodDirectionFinded){
-            let direction = null;
-            let fantomeCaseId = fantome.dataset.numerocase;
+
+        let allDirectionsPossibles = [
+            directions.Haut,
+            directions.Bas,
+            directions.Gauche,
+            directions.Droite
+        ];
+
+        let allGoodDirections = [];
+
+        allDirectionsPossibles.forEach(direction => {
+            let isPossible = true
+            let casePossible = getNumeroCaseDestination(fantomeCaseId, direction)
+            if (!checkDirectionMur(casePossible)) {
+                isPossible = false;
+            }
+            if (CheckFantomeCollision(casePossible)) {
+                isPossible = false;
+            }
+
+            if (isPossible) {
+                allGoodDirections.push(direction);
+            }
+        });
+
+        if (allGoodDirections.length > 1) {
+            //Plusieurs direction possible, j'élimine celle qui ne va pas avec previous directrion
             let previousDirection = fantome.dataset.previousDirection;
 
-                switch (direction) {
-                    case 0: //Vers le haut
-                        caseDestination = getNumberCaseDestination(fantomeCaseId, directions.Up);
-                        break;
-
-                    case 1: //Vers le bas
-                        caseDestination = getNumberCaseDestination(fantomeCaseId, directions.Down);
-                        break;
-
-                    case 2: //Vers la gauche
-                        caseDestination = getNumberCaseDestination(fantomeCaseId, directions.Left);
-                        break;
-
-                    case 3: //Vers la droite
-                        caseDestination = getNumberCaseDestination(fantomeCaseId, directions.Right);
-                        break;
+            allGoodDirections.forEach(goodDirection => {
+                if (!CheckFantomeNotGoBack(parseInt(previousDirection), goodDirection)) {
+                    const index = allGoodDirections.indexOf(goodDirection);
+                    if (index > -1) { // only splice array when item is found
+                        allGoodDirections.splice(index, 1); // 2nd parameter means remove one item only
+                    }
                 }
-                // Vérifier si je peux aller dans cette direction
-                if (checkDirectionWall(caseDestination) 
-                && !checkPhantomCollision(caseDestination)
-                && checkFantomeNotGoBack (previousDirection, direction)){
-                    fantome.classList.remove("fantome");
-                    fantome.removeAttribute("data-previous-direction");
-                    caseDestination.classList.add("fantome");
-                    caseDestination.dataset.previousDirection = direction;
-                    goodDirectionFinded = true;
-                }
+            });
         }
+
+        //J'ai un tableau allGoodDirection, qui contiens toutes les bonnes directions possibles
+        //Il en faut une au hasard
+        let elementOfTable = getRandomNumber(allGoodDirections.length);
+        let direction = allGoodDirections[elementOfTable];
+        caseDestination = getNumeroCaseDestination(fantomeCaseId, direction);
+
+        fantome.classList.remove("fantome");
+        fantome.removeAttribute("data-previous-direction");
+        caseDestination.classList.add("fantome");
+        caseDestination.dataset.previousDirection = direction;
+        goodDirectionFinded = true;
     });
 }
 
-// Mon fantome ne retourne pas en arrière
-function checkFantomeNotGoBack(previousDirection, direction){
-    let canMove = false
+function CheckFantomeNotGoBack(previousDirection, direction) {
+    let canMove = false;
 
-    // Si previousDirection est 0, alors direction ne peut pas être 1
-    // Si previousDirection est 1, alors direction ne peut pas être 0
-    // Si previousDirection est 2, alors direction ne peut pas être 3
-    // Si previousDirection est 3, alors direction ne peut pas être 2
-
-    do {
-        switch (previousDirection) {
-            case 0: // Il est allé vers le haut avant
-                // ma direction ne peut pas être 1 => il ne peut pas mnt, aller vers le bas (retour arrière)
-                if (direction != 1) {
-                    canMove = true;
-                }
-                break;
-            case 1:
-                // ma direction ne peut pas être 0
-                if (direction != 0) {
-                    canMove = true;
-                }
-                break;
-            case 2:
-                // ma direction ne peut pas être 3
-                if (direction != 3) {
-                    canMove = true;
-                }
-                break;
-            case 3:
-                // ma direction ne peut pas être 2
-                if (direction != 2) {
-                    canMove = true;
-                }
-                break;
+    switch (previousDirection) {
+        case directions.Haut:
+            direction == directions.Bas ? canMove = false : canMove = true;
+            break;
+        case directions.Bas:
+            direction == directions.Haut ? canMove = false : canMove = true;
+            break;
+        case directions.Gauche:
+            direction == directions.Droite ? canMove = false : canMove = true;
+            break;
+        case directions.Droite:
+            direction == directions.Gauche ? canMove = false : canMove = true;
+            break;
         default:
-        canMove = true;
-    };
-        return canMove;
-  }  
+            canMove = true;
+    }
+    return canMove;
 }
-// 
-function getNumberCaseDestination(caseActuelle, direction){
+
+function getNumeroCaseDestination(caseActuelle, direction) {
     let caseDestination = null;
-    switch (direction) {
-        case directions.Up:
-            // Déplacer la case contenant pac-man, de 1 vers le haut
-            caseDestination = getCaseByIndex(parseInt(caseActuelle) - sizeCaseWitdth)
+    let directionInt = parseInt(direction);
+    let caseActuelleInt = parseInt(caseActuelle);
+    switch (directionInt) {
+        case directions.Haut:
+            //Déplacer la case contenant pacman de 1 vers le haut
+            caseDestination = getCaseByIndex(caseActuelleInt - sizeCaseWidth);
             break;
-        case directions.Right:
-            // Déplacer la case contenant pac-man, de 1 vers la droite
-            caseDestination = getCaseByIndex(parseInt(caseActuelle) + 1)
-
+        case directions.Droite:
+            //Déplacer la case contenant pacman de 1 vers la droite
+            caseDestination = getCaseByIndex(caseActuelleInt + 1);
             break;
-        case directions.Left:
-            // Déplacer la case contenant pac-man, de 1 vers la gauche
-            caseDestination = getCaseByIndex(parseInt(caseActuelle) - 1)
-
+        case directions.Gauche:
+            //Déplacer la case contenant pacman de 1 vers la gauche
+            caseDestination = getCaseByIndex(caseActuelleInt - 1);
             break;
-        case directions.Down:
-            // Déplacer la case contenant pac-man, de 1 vers le bas
-            caseDestination = getCaseByIndex(parseInt(caseActuelle) + sizeCaseWitdth)
-            break;
+        case directions.Bas:
+            caseDestination = getCaseByIndex(caseActuelleInt + sizeCaseWidth);
         default:
             break;
     };
     return caseDestination;
 }
 
-// 
 const directions = {
-    Up : 0,
-    Down : 1,
-    Right : 2,
-    Left : 3
+    Haut: 0,
+    Bas: 1,
+    Droite: 2,
+    Gauche: 3
 };
