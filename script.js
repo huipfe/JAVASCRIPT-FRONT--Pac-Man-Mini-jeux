@@ -5,7 +5,11 @@
  * OK 4) Gérer les contraintes de déplacement (pas dans les murs) 
  * OK 5) Pièce à manger
  * OK 6) Gérer les fantomes
- * 7) Déplacer les fantomes mieux
+ * 7) Déplacer les fantomes : en aléatoire 
+ *     - Changement de direction si on rencontre un mur
+ *     - Empecher retour au milieu, 
+ *     - Ou 
+ *     - Direction au hasard, hors mis direction précédente.
  * 8) Gerer la collision entre pac-man et un fantome
  * 9) Gerer les pastilles vertes de puissance (un mode ou pacman peut manger un fantome)
  * 10) Gerer une cerise.
@@ -168,6 +172,7 @@ function checkPhantomCollision(caseDestination) {
     }
 }
 
+// 
 function checkPointEating(caseDestination){
     if (caseDestination.classList.contains("point")) {
         incrementScore()
@@ -175,16 +180,20 @@ function checkPointEating(caseDestination){
     }
 }
 
+// 
 function incrementScore () {
 score++
 scoreHTML.innerHTML = score;
-// let allPoints = layout.filter(1=> 1==0);
+    // let allPoints = layout.filter(1 => 1 == 0);
+    let allPoints = layout.filter(l => l == 0);
+
 // console.log(allPoints.length);
 if(score == allPoints.length){
     alert("You Win, motherfucker !");
     }
 }
 
+// 
 function generatePhantom (){
     for(let i = 0; i < 4; i++) {
         // Je récupere les cases possible, qui peuvent supporter la génération d'un fantome
@@ -202,46 +211,97 @@ function generatePhantom (){
 
 }
 
+// 
 function getRandomNumber(max){
     return Math.floor(Math.random() * max);
 }
 
+// 
 function DeplacePhantom(){
     // console.log("Déplacer Fantome")
     // Récuperer tous mes fantomes
     let allPhantom = document.querySelectorAll(".fantome");
     allPhantom.forEach(fantome => {
         let goodDirectionFinded = false
-        while (!goodDirectionFinded){
-            let direction = getRandomNumber(4);
+
+        while(!goodDirectionFinded){
+            let direction = null;
             let fantomeCaseId = fantome.dataset.numerocase;
-            switch (direction) {
-                case 0: //Vers le haut
-                    caseDestination = getNumberCaseDestination(fantomeCaseId, directions.Up);
-                    break;
+            let previousDirection = fantome.dataset.previousDirection;
 
-                case 1: //Vers le bas
-                    caseDestination = getNumberCaseDestination(fantomeCaseId, directions.Down);
-                    break;
+                switch (direction) {
+                    case 0: //Vers le haut
+                        caseDestination = getNumberCaseDestination(fantomeCaseId, directions.Up);
+                        break;
 
-                case 2: //Vers la gauche
-                    caseDestination = getNumberCaseDestination(fantomeCaseId, directions.Left);
-                    break;
+                    case 1: //Vers le bas
+                        caseDestination = getNumberCaseDestination(fantomeCaseId, directions.Down);
+                        break;
 
-                case 3: //Vers la droite
-                    caseDestination = getNumberCaseDestination(fantomeCaseId, directions.Right);
-                    break;
-            }
-            // Vérifier si je peux aller dans cette direction
-            if (checkDirectionWall(caseDestination) && !checkPhantomCollision(caseDestination)) {
-                fantome.classList.remove("fantome");
-                caseDestination.classList.add("fantome")
-                goodDirectionFinded = true;
-            }
+                    case 2: //Vers la gauche
+                        caseDestination = getNumberCaseDestination(fantomeCaseId, directions.Left);
+                        break;
+
+                    case 3: //Vers la droite
+                        caseDestination = getNumberCaseDestination(fantomeCaseId, directions.Right);
+                        break;
+                }
+                // Vérifier si je peux aller dans cette direction
+                if (checkDirectionWall(caseDestination) 
+                && !checkPhantomCollision(caseDestination)
+                && checkFantomeNotGoBack (previousDirection, direction)){
+                    fantome.classList.remove("fantome");
+                    fantome.removeAttribute("data-previous-direction");
+                    caseDestination.classList.add("fantome");
+                    caseDestination.dataset.previousDirection = direction;
+                    goodDirectionFinded = true;
+                }
         }
     });
 }
 
+// Mon fantome ne retourne pas en arrière
+function checkFantomeNotGoBack(previousDirection, direction){
+    let canMove = false
+
+    // Si previousDirection est 0, alors direction ne peut pas être 1
+    // Si previousDirection est 1, alors direction ne peut pas être 0
+    // Si previousDirection est 2, alors direction ne peut pas être 3
+    // Si previousDirection est 3, alors direction ne peut pas être 2
+
+    do {
+        switch (previousDirection) {
+            case 0: // Il est allé vers le haut avant
+                // ma direction ne peut pas être 1 => il ne peut pas mnt, aller vers le bas (retour arrière)
+                if (direction != 1) {
+                    canMove = true;
+                }
+                break;
+            case 1:
+                // ma direction ne peut pas être 0
+                if (direction != 0) {
+                    canMove = true;
+                }
+                break;
+            case 2:
+                // ma direction ne peut pas être 3
+                if (direction != 3) {
+                    canMove = true;
+                }
+                break;
+            case 3:
+                // ma direction ne peut pas être 2
+                if (direction != 2) {
+                    canMove = true;
+                }
+                break;
+        default:
+        canMove = true;
+    };
+        return canMove;
+  }  
+}
+// 
 function getNumberCaseDestination(caseActuelle, direction){
     let caseDestination = null;
     switch (direction) {
@@ -269,9 +329,10 @@ function getNumberCaseDestination(caseActuelle, direction){
     return caseDestination;
 }
 
+// 
 const directions = {
-    Up : 1,
-    Down : 2,
-    Right : 3,
-    Left : 4
+    Up : 0,
+    Down : 1,
+    Right : 2,
+    Left : 3
 };
