@@ -2,6 +2,7 @@ const gameDiv = document.getElementById("game");
 const sizeCaseWidth = 28;
 const scoreHtml = document.getElementById("score");
 let score = 0;
+let PacmanCanEatGhost = false;
 /*
 OK Créer le plateau (dynamique)
 OK Créer notre pacman
@@ -14,7 +15,7 @@ Déplacer les fantômes : Moyen, en aléatoire, déplacement pas top
      - Empecher retour ou milieu
      - OU 
      - Direction au hasard hors mis direction précédente
-Gérer collision pacman et un fantome
+OK Gérer collision pacman et un fantome
 Gérer les power-pellet (un mode ou pacman peut manger un fantome)
 */
 
@@ -126,7 +127,20 @@ function DeplacerPacman(direction) {
         if (checkDirectionMur(caseDestination)) {
             pacmanDiv.classList.remove("pacman");
             caseDestination.classList.add("pacman");
-            if (!checkPacmanEatedByGhost(caseDestination)){
+            if(caseDestination.classList.contains("point-puissance")){
+                // Pacman peut manger des fantomes
+                caseDestination.classList.remove("point-puissance");
+                PacmanCanEatGhost = true;
+                console.log("Pacman peut manger des fantomes");
+                gameDiv.classList.add("PacmanCanEatGhost"); 
+                // Au bout de 5 secondes, on ne peut plus pouvoir manger des fantomes
+                setTimeout(() => {
+                    PacmanCanEatGhost = false;
+                    console.log("Pacman ne peut plus manger des fantomes");
+                    gameDiv.classList.remove("PacmanCanEatGhost"); 
+                }, 5000);
+            }
+            if(!checkPacmanEatedByGhost(caseDestination)){
                 checkPointEating(caseDestination)
             }
         }
@@ -152,7 +166,13 @@ function checkPacmanEatedByGhost(caseToCheck) {
 
     if (containsPacman && containsGhost) 
     {
-        alert("Vous avez perdu!");
+        if (PacmanCanEatGhost) {
+            caseToCheck.classList.remove("fantome");
+
+        }
+        else {
+            alert("Vous avez perdu!");
+        }
         // Annuler les événements, ou écraser le plateau, proposer de rejouer etc.
     }
 }
