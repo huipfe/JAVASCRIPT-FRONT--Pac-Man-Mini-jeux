@@ -3,6 +3,9 @@ const sizeCaseWidth = 28;
 const scoreHtml = document.getElementById("score");
 let score = 0;
 let PacmanCanEatGhost = false;
+let intervalFantome = null;
+
+
 /*
 OK Créer le plateau (dynamique)
 OK Créer notre pacman
@@ -54,14 +57,17 @@ const layout = [
 // 2 - ghost-lair
 // 3 - power-pellet
 // 4 - empty
+document.getElementById("Play").addEventListener("click", () =>{
+    stopPartie()
+    creerPlateau();
 
+})
 creerPlateau();
 
-document.addEventListener("keyup", (event) => {
-    DeplacerPacman(event.key);
-});
+
 
 function creerPlateau() {
+    gameDiv.innerHTML = "";
     let cptCase = 0;
     scoreHtml.innerHTML = score;
     layout.forEach(caseLayout => {
@@ -92,8 +98,14 @@ function creerPlateau() {
     generateFantome();
 
     //Déplacement fantome aleatoire
-    setInterval(deplacerFantomes, 1000)
+    intervalFantome = setInterval(deplacerFantomes, 1000)
 
+    document.addEventListener("keyup", onKeyUpAction);
+
+}
+
+function onKeyUpAction(event) {
+    DeplacerPacman(event.key);
 }
 
 function getCaseByIndex(index) {
@@ -131,12 +143,12 @@ function DeplacerPacman(direction) {
                 // Pacman peut manger des fantomes
                 caseDestination.classList.remove("point-puissance");
                 PacmanCanEatGhost = true;
-                console.log("Pacman peut manger des fantomes");
+                // console.log("Pacman peut manger des fantomes");
                 gameDiv.classList.add("PacmanCanEatGhost"); 
                 // Au bout de 5 secondes, on ne peut plus pouvoir manger des fantomes
                 setTimeout(() => {
                     PacmanCanEatGhost = false;
-                    console.log("Pacman ne peut plus manger des fantomes");
+                    // console.log("Pacman ne peut plus manger des fantomes");
                     gameDiv.classList.remove("PacmanCanEatGhost"); 
                 }, 5000);
             }
@@ -171,6 +183,7 @@ function checkPacmanEatedByGhost(caseToCheck) {
 
         }
         else {
+            stopPartie();
             alert("Vous avez perdu!");
         }
         // Annuler les événements, ou écraser le plateau, proposer de rejouer etc.
@@ -200,6 +213,7 @@ function incrementScore() {
     scoreHtml.innerHTML = score;
     let allpoints = layout.filter(l => l == 0);
     if (score == allpoints.length) {
+        stopPartie();
         alert("C'est gagné");
     }
 }
@@ -330,9 +344,23 @@ function getNumeroCaseDestination(caseActuelle, direction) {
     return caseDestination;
 }
 
+// Supprimer les écouteurs d'évenements pour déplacer Pacman.
+// Arrêter le déplacement des fantomes.
+function stopPartie() {
+    // Arrêter le déplacement des fantomes, l'interval
+    if (intervalFantome != null){
+        clearInterval(intervalFantome);
+    }
+    // Supprimer Les événements sur les flêches
+    // document.removeEventListener("keydown", movePacman);
+    // document.removeEventListener("keyup", stopPartie);
+    document.removeEventListener("keyup", onKeyUpAction)
+}
+
 const directions = {
     Haut: 0,
     Bas: 1,
     Droite: 2,
     Gauche: 3
 };
+
