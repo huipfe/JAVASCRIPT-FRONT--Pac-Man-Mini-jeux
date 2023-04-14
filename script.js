@@ -7,7 +7,9 @@ const directions = {
     Droite: 2,
     Gauche: 3
 };
-
+const timePacmanInGhost = 5000;
+const speedPacMan = 500;
+const speedGhost = 800;
 let score = 0;
 let PacmanCanEatGhost = false;
 let intervalFantome = null;
@@ -107,9 +109,9 @@ function creerPlateau() {
     generateFantome();
 
     //Déplacement fantome aleatoire
-    intervalFantome = setInterval(deplacerFantomes, 800)
+    intervalFantome = setInterval(deplacerFantomes, speedGhost)
 
-    intervalPacMan = setInterval(DeplacerPacman, 500)
+    intervalPacMan = setInterval(DeplacerPacman, speedPacMan)
 
     document.addEventListener("keyup", onKeyUpAction);
 
@@ -182,7 +184,7 @@ function DeplacerPacman() {
                     PacmanCanEatGhost = false;
                     // console.log("Pacman ne peut plus manger des fantomes");
                     gameDiv.classList.remove("PacmanCanEatGhost"); 
-                }, 5000);
+                }, timePacmanInGhost);
             }
             if(!checkPacmanEatedByGhost(caseDestination)){
                 checkPointEating(caseDestination)
@@ -358,30 +360,38 @@ function getNumeroCaseDestination(caseActuelle, direction) {
     let caseDestination = null;
     let directionInt = parseInt(direction);
     let caseActuelleInt = parseInt(caseActuelle);
-    if(caseActuelleInt == 364 && direction == directions.Gauche){
-        caseDestination = getCaseByIndex(caseActuelle + 27)
+    // if(caseActuelleInt == 364 && direction == directions.Gauche){
+    //     caseDestination = getCaseByIndex(caseActuelle + 27)
+    // }
+    // else if (caseActuelleInt == 391 && direction == directions.Droite) {
+    //     caseDestination = getCaseByIndex(caseActuelle - 27)
+    // }
+    if (caseActuelleInt == 364 && direction == directions.Gauche) {
+        caseDestination = getCaseByIndex(caseActuelleInt + 27)
     }
     else if (caseActuelleInt == 391 && direction == directions.Droite) {
-        caseDestination = getCaseByIndex(caseActuelle - 27)
+        caseDestination = getCaseByIndex(caseActuelleInt - 27)
     }
-    switch (directionInt) {
-        case directions.Haut:
-            //Déplacer la case contenant pacman de 1 vers le haut
-            caseDestination = getCaseByIndex(caseActuelleInt - sizeCaseWidth);
-            break;
-        case directions.Droite:
-            //Déplacer la case contenant pacman de 1 vers la droite
-            caseDestination = getCaseByIndex(caseActuelleInt + 1);
-            break;
-        case directions.Gauche:
-            //Déplacer la case contenant pacman de 1 vers la gauche
-            caseDestination = getCaseByIndex(caseActuelleInt - 1);
-            break;
-        case directions.Bas:
-            caseDestination = getCaseByIndex(caseActuelleInt + sizeCaseWidth);
-        default:
-            break;
-    };
+    else {
+        switch (directionInt) {
+            case directions.Haut:
+                //Déplacer la case contenant pacman de 1 vers le haut
+                caseDestination = getCaseByIndex(caseActuelleInt - sizeCaseWidth);
+                break;
+            case directions.Droite:
+                //Déplacer la case contenant pacman de 1 vers la droite
+                caseDestination = getCaseByIndex(caseActuelleInt + 1);
+                break;
+            case directions.Gauche:
+                //Déplacer la case contenant pacman de 1 vers la gauche
+                caseDestination = getCaseByIndex(caseActuelleInt - 1);
+                break;
+            case directions.Bas:
+                caseDestination = getCaseByIndex(caseActuelleInt + sizeCaseWidth);
+            default:
+                break;
+          };
+    }
     return caseDestination;
 }
 
@@ -399,3 +409,11 @@ function stopPartie() {
     document.removeEventListener("keyup", onKeyUpAction)
 }
 
+// TODO
+/**ANIMATION
+ * Musique du vrai jeu PacMan, durant toute la partie.
+ * VICTOIRE - CONFETTI ? Musique Applause ?
+ * DEFAITE - Confetti Rouge ? Musique de boouh ?
+ * En cas de commencement de partie :
+ * - Réinit la music du jeux, et les musiques de victoire et défaite
+ */
