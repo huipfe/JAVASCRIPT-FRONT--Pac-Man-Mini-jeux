@@ -168,7 +168,9 @@ function DeplacerPacman() {
     if (caseDestination != null) {
         if (checkDirectionMur(caseDestination)) {
             pacmanDiv.classList.remove("pacman");
+            pacmanDiv.dataset.direction = "";
             caseDestination.classList.add("pacman");
+            caseDestination.dataset.direction = currentDirectionPacman;
             if(caseDestination.classList.contains("point-puissance")){
                 // Pacman peut manger des fantomes
                 caseDestination.classList.remove("point-puissance");
@@ -185,6 +187,9 @@ function DeplacerPacman() {
             if(!checkPacmanEatedByGhost(caseDestination)){
                 checkPointEating(caseDestination)
             }
+        }
+        else {
+            pacmanDiv.dataset.direction = currentDirectionPacman;
         }
     }
 }
@@ -353,6 +358,12 @@ function getNumeroCaseDestination(caseActuelle, direction) {
     let caseDestination = null;
     let directionInt = parseInt(direction);
     let caseActuelleInt = parseInt(caseActuelle);
+    if(caseActuelle == 364 && direction == directions.Gauche){
+        caseDestination = getCaseByIndex(391)
+    }
+    else if (caseActuelle == 391 && direction == directions.Droite) {
+        caseDestination = getCaseByIndex(364)
+    }
     switch (directionInt) {
         case directions.Haut:
             //Déplacer la case contenant pacman de 1 vers le haut

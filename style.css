@@ -135,11 +135,30 @@ background-color: aqua;
     background-position-y: 2px; */
     background-position-x: 0px;
     background-position-y: 0px;
-    animation: pacmanAnimation 1s infinite step-end; 
+    animation: pacmanAnimation 0.5s infinite step-end; 
     /* background-color: yellow; */
     /* border-radius: 50%; */
     box-sizing: border-box;
     border: black solid 2px;
+}
+
+
+/* Haut: 0,
+Bas: 1,
+Droite: 2,
+Gauche: 3 */
+
+#game div.pacman[data-direction="0"] {
+    background-position-y: -32px;
+}
+#game div.pacman[data-direction="1"] {
+    background-position-y: -48px;
+}    
+#game div.pacman[data-direction="2"] {
+    background-position-y: 0px;
+}
+#game div.pacman[data-direction="3"] {
+    background-position-y: -16px;
 }
 
 @keyframes pacmanAnimation {
@@ -147,10 +166,11 @@ background-color: aqua;
         background-position-x: 0px;
     }
     33%{
-        background-position-x: -16px;
+        background-position-x: -18px;
     }
     66%{
-        background-position-x: -32px;
+        background-position-x: -36px;
+        background-position-y: 5px;
     }
     100%{
     }
