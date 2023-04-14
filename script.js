@@ -16,21 +16,6 @@ let intervalFantome = null;
 let intervalPacMan = null;
 let currentDirectionPacman = directions.gauche
 
-/*
-OK Créer le plateau (dynamique)
-OK Créer notre pacman
-OK Gérer ses déplacements (sans contrainte)
-OK Contraintes de déplacement (pas dans les murs)
-OK Pièces à manger
-OK  Générer les fantômes
-Déplacer les fantômes : Moyen, en aléatoire, déplacement pas top
-     - Changment de direction si on rencontre un mur
-     - Empecher retour ou milieu
-     - OU 
-     - Direction au hasard hors mis direction précédente
-OK Gérer collision pacman et un fantome
-Gérer les power-pellet (un mode ou pacman peut manger un fantome)
-*/
 
 const layout = [
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -62,11 +47,13 @@ const layout = [
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 ];
+
 // 0 - pac-dots
 // 1 - wall
 // 2 - ghost-lair
 // 3 - power-pellet
 // 4 - empty
+
 document.getElementById("Play").addEventListener("click", () =>{
     stopPartie()
     creerPlateau();
@@ -147,26 +134,6 @@ function DeplacerPacman() {
     let pacmanDiv = document.querySelector(".pacman");
     let pacManCase = pacmanDiv.dataset.numerocase;
     caseDestination = getNumeroCaseDestination(pacManCase, currentDirectionPacman);
-
-    // let caseDestination = null;
-    // switch (direction) {
-    //     case "ArrowUp":
-    //         //Déplacer la case contenant pacman de 1 vers le haut
-    //         caseDestination = getNumeroCaseDestination(pacManCase, directions.Haut);
-    //         break;
-    //     case "ArrowRight":
-    //         //Déplacer la case contenant pacman de 1 vers la droite
-    //         caseDestination = getNumeroCaseDestination(pacManCase, directions.Droite);
-    //         break;
-    //     case "ArrowLeft":
-    //         //Déplacer la case contenant pacman de 1 vers la gauche
-    //         caseDestination = getNumeroCaseDestination(pacManCase, directions.Gauche);
-    //         break;
-    //     case "ArrowDown":
-    //         caseDestination = getNumeroCaseDestination(pacManCase, directions.Bas);
-    //     default:
-    //         break;
-    // };
     if (caseDestination != null) {
         if (checkDirectionMur(caseDestination)) {
             pacmanDiv.classList.remove("pacman");
@@ -390,7 +357,7 @@ function getNumeroCaseDestination(caseActuelle, direction) {
                 caseDestination = getCaseByIndex(caseActuelleInt + sizeCaseWidth);
             default:
                 break;
-          };
+        };
     }
     return caseDestination;
 }

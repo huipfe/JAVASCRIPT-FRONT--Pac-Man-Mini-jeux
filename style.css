@@ -46,7 +46,7 @@ html {
 
 #game div.fantome {
     /* background-color: red; */
-    background-image: url("image_sprite/Pac-ManSprite.png");
+    background-image: url("assets/image_sprite/Pac-ManSprite.png");
     /* background-position-y: 97px;
     background-position-x: 208px; */
     animation: FantomeAnimation 1s infinite step-end; 
@@ -97,7 +97,7 @@ html {
 }
 #game.PacmanCanEatGhost div.fantome {
     /* background-color: rgb(17, 0, 255); */
-    background-image: url("image_sprite/Pac-ManSprite.png");
+    background-image: url("assets/image_sprite/Pac-ManSprite.png");
     background-position-y: 96px;
     background-position-x: 95px;
     animation: FantomeAnimationGhost 0.3s infinite step-end; 
@@ -118,7 +118,7 @@ background-color: aqua;
 
 /* point-puissance Case 3 */
 #game div.point-puissance {
-    background-image: url("image_sprite/Pac-ManSprite.png");
+    background-image: url("assets/image_sprite/Pac-ManSprite.png");
     background-position-y: 113px;
     background-position-x: 127px;
     /* background-color: greenyellow; */
@@ -130,7 +130,7 @@ background-color: aqua;
 
 /* Pac-Man */
 #game div.pacman {
-    background-image: url("image_sprite/Pac-ManSprite.png");
+    background-image: url("assets/image_sprite/Pac-ManSprite.png");
     /* background-position-x: 210px;
     background-position-y: 2px; */
     background-position-x: 0px;
