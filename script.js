@@ -1,10 +1,18 @@
 const gameDiv = document.getElementById("game");
 const sizeCaseWidth = 28;
 const scoreHtml = document.getElementById("score");
+const directions = {
+    Haut: 0,
+    Bas: 1,
+    Droite: 2,
+    Gauche: 3
+};
+
 let score = 0;
 let PacmanCanEatGhost = false;
 let intervalFantome = null;
-
+let intervalPacMan = null;
+let currentDirectionPacman = directions.gauche
 
 /*
 OK Créer le plateau (dynamique)
@@ -67,6 +75,7 @@ creerPlateau();
 
 
 function creerPlateau() {
+    score = 0
     gameDiv.innerHTML = "";
     let cptCase = 0;
     scoreHtml.innerHTML = score;
@@ -98,14 +107,33 @@ function creerPlateau() {
     generateFantome();
 
     //Déplacement fantome aleatoire
-    intervalFantome = setInterval(deplacerFantomes, 1000)
+    intervalFantome = setInterval(deplacerFantomes, 800)
+
+    intervalPacMan = setInterval(DeplacerPacman, 500)
 
     document.addEventListener("keyup", onKeyUpAction);
 
 }
 
 function onKeyUpAction(event) {
-    DeplacerPacman(event.key);
+    switch (event.key) {
+        case "ArrowUp":
+            //Déplacer la case contenant pacman de 1 vers le haut
+            currentDirectionPacman = directions.Haut
+            break;
+        case "ArrowRight":
+            //Déplacer la case contenant pacman de 1 vers la droite
+            currentDirectionPacman = directions.Droite
+            break;
+        case "ArrowLeft":
+            //Déplacer la case contenant pacman de 1 vers la gauche
+            currentDirectionPacman = directions.Gauche
+            break;
+        case "ArrowDown":
+            currentDirectionPacman = directions.Bas
+        default:
+            break;
+    };
 }
 
 function getCaseByIndex(index) {
@@ -113,28 +141,30 @@ function getCaseByIndex(index) {
     return caseGame;
 }
 
-function DeplacerPacman(direction) {
+function DeplacerPacman() {
     let pacmanDiv = document.querySelector(".pacman");
     let pacManCase = pacmanDiv.dataset.numerocase;
-    let caseDestination = null;
-    switch (direction) {
-        case "ArrowUp":
-            //Déplacer la case contenant pacman de 1 vers le haut
-            caseDestination = getNumeroCaseDestination(pacManCase, directions.Haut);
-            break;
-        case "ArrowRight":
-            //Déplacer la case contenant pacman de 1 vers la droite
-            caseDestination = getNumeroCaseDestination(pacManCase, directions.Droite);
-            break;
-        case "ArrowLeft":
-            //Déplacer la case contenant pacman de 1 vers la gauche
-            caseDestination = getNumeroCaseDestination(pacManCase, directions.Gauche);
-            break;
-        case "ArrowDown":
-            caseDestination = getNumeroCaseDestination(pacManCase, directions.Bas);
-        default:
-            break;
-    };
+    caseDestination = getNumeroCaseDestination(pacManCase, currentDirectionPacman);
+
+    // let caseDestination = null;
+    // switch (direction) {
+    //     case "ArrowUp":
+    //         //Déplacer la case contenant pacman de 1 vers le haut
+    //         caseDestination = getNumeroCaseDestination(pacManCase, directions.Haut);
+    //         break;
+    //     case "ArrowRight":
+    //         //Déplacer la case contenant pacman de 1 vers la droite
+    //         caseDestination = getNumeroCaseDestination(pacManCase, directions.Droite);
+    //         break;
+    //     case "ArrowLeft":
+    //         //Déplacer la case contenant pacman de 1 vers la gauche
+    //         caseDestination = getNumeroCaseDestination(pacManCase, directions.Gauche);
+    //         break;
+    //     case "ArrowDown":
+    //         caseDestination = getNumeroCaseDestination(pacManCase, directions.Bas);
+    //     default:
+    //         break;
+    // };
     if (caseDestination != null) {
         if (checkDirectionMur(caseDestination)) {
             pacmanDiv.classList.remove("pacman");
@@ -350,17 +380,11 @@ function stopPartie() {
     // Arrêter le déplacement des fantomes, l'interval
     if (intervalFantome != null){
         clearInterval(intervalFantome);
+        clearInterval(intervalPacMan);
     }
     // Supprimer Les événements sur les flêches
     // document.removeEventListener("keydown", movePacman);
     // document.removeEventListener("keyup", stopPartie);
     document.removeEventListener("keyup", onKeyUpAction)
 }
-
-const directions = {
-    Haut: 0,
-    Bas: 1,
-    Droite: 2,
-    Gauche: 3
-};
 
