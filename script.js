@@ -358,11 +358,11 @@ function getNumeroCaseDestination(caseActuelle, direction) {
     let caseDestination = null;
     let directionInt = parseInt(direction);
     let caseActuelleInt = parseInt(caseActuelle);
-    if(caseActuelle == 364 && direction == directions.Gauche){
-        caseDestination = getCaseByIndex(391)
+    if(caseActuelleInt == 364 && direction == directions.Gauche){
+        caseDestination = getCaseByIndex(caseActuelle + 27)
     }
-    else if (caseActuelle == 391 && direction == directions.Droite) {
-        caseDestination = getCaseByIndex(364)
+    else if (caseActuelleInt == 391 && direction == directions.Droite) {
+        caseDestination = getCaseByIndex(caseActuelle - 27)
     }
     switch (directionInt) {
         case directions.Haut:
